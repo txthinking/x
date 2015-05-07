@@ -6,7 +6,7 @@ Group of ants on golang
 ### Install
 
 ```
-$ go get -u txthinking/ant
+$ go get -u github.com/txthinking/ant
 ```
 
 Contributing
