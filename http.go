@@ -8,6 +8,8 @@ import(
     "io"
 )
 
+// TODO combine
+
 // RFC 2388
 func MultipartFormDataFromFile(params, files map[string][]string, boundary string)(ior io.Reader, err error){
     var bs []byte
