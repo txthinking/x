@@ -1,5 +1,7 @@
 package ant
 
+// ref: https://gist.github.com/fatih/6206844
+
 import (
     "sync"
 )
