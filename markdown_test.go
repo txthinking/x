@@ -1,15 +1,15 @@
 package ant
 
-import(
-    "testing"
+import (
+	"testing"
 )
 
-func TestMarkdown(t *testing.T){
-    m := []byte(`
+func TestMarkdown(t *testing.T) {
+	m := []byte(`
 * aaaa
 * bbbb
 * ssss
 `)
-    h := Markdown(m)
-    t.Log(h)
+	h := Markdown(m)
+	t.Log(h)
 }
