@@ -34,7 +34,7 @@ func IP2Decimal(ip string) (n int64, err error) {
 	return
 }
 
-// Decimal2IP tranform a decimal IP to x.x.x.x format.
+// Decimal2IP transform a decimal IP to x.x.x.x format.
 // ref: https://zh.wikipedia.org/wiki/IPv4
 func Decimal2IP(n int64) (ip string, err error) {
 	ips := make([]string, 4)

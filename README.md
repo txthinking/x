@@ -14,9 +14,8 @@ $ go get -u github.com/txthinking/ant
 Contributing
 ---
 
-* Please create `ant` with your pull request on `develop` branch
+* Please contribute your pull request on `develop` branch
 * Please contain test case
-* Thank you
 
 License
 ---
