@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/txthinking/ant)](https://goreportcard.com/report/github.com/txthinking/ant)
 [![GoDoc](https://godoc.org/github.com/txthinking/ant?status.svg)](https://godoc.org/github.com/txthinking/ant)
 
-A utils library for golang.
+A util library for golang.
 
 ### Install
 
