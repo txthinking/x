@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+// MD5 encrypt s according to md5 algorithm
 func MD5(s string) (r string) {
 	var h hash.Hash
 	h = md5.New()

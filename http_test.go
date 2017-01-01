@@ -7,10 +7,10 @@ import (
 func TestMultipartFormDataFromFile(t *testing.T) {
 	r, err := MultipartFormDataFromFile(
 		map[string][]string{
-			"a": []string{"哈啊好"},
+			"a": {"哈啊好"},
 		},
 		map[string][]string{
-			"f": []string{"/etc/hosts"},
+			"f": {"/etc/hosts"},
 		},
 		"aasfsafsfsfsfsdf",
 	)

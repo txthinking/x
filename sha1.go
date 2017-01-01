@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+// SHA1 encrypt s according to sha1 algorithm
 func SHA1(s string) (r string) {
 	var h hash.Hash
 	h = sha1.New()

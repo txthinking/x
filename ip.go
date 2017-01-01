@@ -6,9 +6,10 @@ import (
 	"strings"
 )
 
-// https://zh.wikipedia.org/wiki/IPv4
+// IP2Decimal transform ip format like x.x.x.x to decimal.
+// ref: https://zh.wikipedia.org/wiki/IPv4
 func IP2Decimal(ip string) (n int64, err error) {
-	var ss []string = strings.Split(ip, ".")
+	ss := strings.Split(ip, ".")
 	var b string
 	var s string
 	var i int64
@@ -23,7 +24,7 @@ func IP2Decimal(ip string) (n int64, err error) {
 		}
 		s = strconv.FormatInt(i, 2)
 		var j int
-		var need int = 8 - len(s)
+		need := 8 - len(s)
 		for j = 0; j < need; j++ {
 			s = "0" + s
 		}
@@ -33,13 +34,14 @@ func IP2Decimal(ip string) (n int64, err error) {
 	return
 }
 
-// https://zh.wikipedia.org/wiki/IPv4
+// Decimal2IP tranform a decimal IP to x.x.x.x format.
+// ref: https://zh.wikipedia.org/wiki/IPv4
 func Decimal2IP(n int64) (ip string, err error) {
-	var ips []string = make([]string, 4)
+	ips := make([]string, 4)
 	var b string
 	var i int64
 	b = strconv.FormatInt(n, 2)
-	var need int = 32 - len(b)
+	need := 32 - len(b)
 	var j int
 	for j = 0; j < need; j++ {
 		b = "0" + b
@@ -56,6 +58,7 @@ func Decimal2IP(n int64) (ip string, err error) {
 	return
 }
 
+// CIDRInfo is the struct of CIDR
 type CIDRInfo struct {
 	First   string
 	Last    string
@@ -64,10 +67,11 @@ type CIDRInfo struct {
 	Count   int64
 }
 
-// wiki: http://goo.gl/AEUIi8
+// CIDR return *CIDRInfo from like this x.x.x.x/x
+// ref: http://goo.gl/AEUIi8
 func CIDR(cidr string) (c *CIDRInfo, err error) {
 	c = new(CIDRInfo)
-	var cs []string = strings.Split(cidr, "/")
+	cs := strings.Split(cidr, "/")
 	if len(cs) != 2 {
 		err = errors.New("CIDR Invalid")
 		return
@@ -79,7 +83,7 @@ func CIDR(cidr string) (c *CIDRInfo, err error) {
 	}
 	var ipb string
 	ipb = strconv.FormatInt(ipd, 2)
-	var need int = 32 - len(ipb)
+	need := 32 - len(ipb)
 	var j int
 	for j = 0; j < need; j++ {
 		ipb = "0" + ipb
@@ -108,7 +112,7 @@ func CIDR(cidr string) (c *CIDRInfo, err error) {
 	network, _ = Decimal2IP(networkI)
 	c.Network = network
 
-	var first string = ipb[0:n]
+	first := ipb[0:n]
 	var firstI int64
 	for j = 0; j < 32-int(n); j++ {
 		first = first + "0"
@@ -117,7 +121,7 @@ func CIDR(cidr string) (c *CIDRInfo, err error) {
 	first, _ = Decimal2IP(firstI)
 	c.First = first
 
-	var last string = ipb[0:n]
+	last := ipb[0:n]
 	var lastI int64
 	for j = 0; j < 32-int(n); j++ {
 		last = last + "1"

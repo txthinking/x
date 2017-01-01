@@ -7,14 +7,16 @@ import (
 	"strings"
 )
 
+// IsEmail determine whether it is email address
 func IsEmail(email string) (ok bool, err error) {
-	var p string = `^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`
+	p := `^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`
 	ok, err = regexp.MatchString(p, email)
 	return
 }
 
+// IsBankCard determine whether it is bankcard number
 func IsBankCard(n int64) (ok bool, err error) {
-	var s string = strconv.FormatInt(n, 10)
+	s := strconv.FormatInt(n, 10)
 	var sum int
 	var i int
 	for i = 1; i < len(s); i++ {
@@ -37,6 +39,7 @@ func IsBankCard(n int64) (ok bool, err error) {
 	return
 }
 
+// IsChineseID determine whether it is Chinese ID Card Number
 func IsChineseID(s string) (ok bool, err error) {
 	if len(s) != 18 {
 		return
@@ -53,7 +56,7 @@ func IsChineseID(s string) (ok bool, err error) {
 		w = int(math.Pow(2, float64(i+1-1))) % 11
 		sum += now * w
 	}
-	var v int = (12 - (sum % 11)) % 11
+	v := (12 - (sum % 11)) % 11
 	if v == 10 {
 		if strings.ToLower(string(s[len(s)-1])) != "x" {
 			return
@@ -68,9 +71,10 @@ func IsChineseID(s string) (ok bool, err error) {
 	return
 }
 
+// IsChineseWords determine whether it is Chinese words
 // Notice: NOT ALL
 func IsChineseWords(words string) (ok bool, err error) {
-	var p string = `^[\x{4e00}-\x{9fa5}]+$`
+	p := `^[\x{4e00}-\x{9fa5}]+$`
 	ok, err = regexp.MatchString(p, words)
 	return
 }

@@ -1,7 +1,9 @@
-ant
-=======
+## ant
+[![Build Status](https://travis-ci.org/txthinking/ant.svg?branch=master)](https://travis-ci.org/txthinking/ant)
+[![Go Report Card](https://goreportcard.com/badge/github.com/txthinking/ant)](https://goreportcard.com/report/github.com/txthinking/ant)
+[![GoDoc](https://godoc.org/github.com/txthinking/ant?status.svg)](https://godoc.org/github.com/txthinking/ant)
 
-Group of ants on golang
+A utils library for golang.
 
 ### Install
 

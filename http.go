@@ -8,12 +8,11 @@ import (
 	"path/filepath"
 )
 
-// TODO combine
-
-// RFC 2388
+// MultipartFormDataFromFile generate multipart form data according to RFC 2388.
+// files is the paths of your files
 func MultipartFormDataFromFile(params, files map[string][]string, boundary string) (ior io.Reader, err error) {
 	var bs []byte
-	var bf *bytes.Buffer = &bytes.Buffer{}
+	bf := &bytes.Buffer{}
 
 	// prepare common value
 	var name, value string
@@ -44,10 +43,10 @@ func MultipartFormDataFromFile(params, files map[string][]string, boundary strin
 	return
 }
 
-// RFC 2388
+// MultipartFormDataFromReader generate multipart form data according to RFC 2388.
 func MultipartFormDataFromReader(params map[string][]string, files map[string][]io.Reader, boundary string) (ior io.Reader, err error) {
 	var bs []byte
-	var bf *bytes.Buffer = &bytes.Buffer{}
+	bf := &bytes.Buffer{}
 
 	// prepare common value
 	var name, value string

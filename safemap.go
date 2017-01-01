@@ -6,11 +6,13 @@ import (
 	"sync"
 )
 
+// SafeMap is concurrent security map
 type SafeMap struct {
 	lock *sync.RWMutex
 	sm   map[interface{}]interface{}
 }
 
+// NewSafeMap get a new concurrent security map
 func NewSafeMap() *SafeMap {
 	return &SafeMap{
 		lock: new(sync.RWMutex),
@@ -18,6 +20,7 @@ func NewSafeMap() *SafeMap {
 	}
 }
 
+// Get used to get a value by key
 func (m *SafeMap) Get(k interface{}) interface{} {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
@@ -27,6 +30,7 @@ func (m *SafeMap) Get(k interface{}) interface{} {
 	return nil
 }
 
+// Set used to set value with key
 func (m *SafeMap) Set(k interface{}, v interface{}) bool {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -40,6 +44,7 @@ func (m *SafeMap) Set(k interface{}, v interface{}) bool {
 	return true
 }
 
+// IsExists determine whether k exists
 func (m *SafeMap) IsExists(k interface{}) bool {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
@@ -49,6 +54,7 @@ func (m *SafeMap) IsExists(k interface{}) bool {
 	return true
 }
 
+// Delete used to delete a key
 func (m *SafeMap) Delete(k interface{}) {
 	m.lock.Lock()
 	defer m.lock.Unlock()

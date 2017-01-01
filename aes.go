@@ -8,22 +8,23 @@ import (
 	"io"
 )
 
-const AES_256_KEY_LENTH = 32
+// AES256KeyLength is the length of key for AES 256 crypt
+const AES256KeyLength = 32
 
-// Cut or append empty data on the key.
-// make the key length equal 32
+// AESMake256Key cut or append empty data on the key
+// and make sure the key lenth equal 32
 func AESMake256Key(k []byte) []byte {
-	if len(k) < AES_256_KEY_LENTH {
-		var a []byte = make([]byte, AES_256_KEY_LENTH-len(k))
+	if len(k) < AES256KeyLength {
+		a := make([]byte, AES256KeyLength-len(k))
 		return append(k, a...)
 	}
-	if len(k) > AES_256_KEY_LENTH {
-		return k[:AES_256_KEY_LENTH]
+	if len(k) > AES256KeyLength {
+		return k[:AES256KeyLength]
 	}
 	return k
 }
 
-// aes 256 cfb
+// AESEncrypt encrypt s with given k
 func AESEncrypt(s, k []byte) ([]byte, error) {
 	block, err := aes.NewCipher(AESMake256Key(k))
 	if err != nil {
@@ -42,7 +43,7 @@ func AESEncrypt(s, k []byte) ([]byte, error) {
 	return cb, nil
 }
 
-// aes 256 cfb
+// AESDecrypt decrypt c with given k
 func AESDecrypt(c, k []byte) ([]byte, error) {
 	block, err := aes.NewCipher(AESMake256Key(k))
 	if err != nil {
