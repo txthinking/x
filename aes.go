@@ -1,6 +1,7 @@
 package ant
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -24,8 +25,8 @@ func AESMake256Key(k []byte) []byte {
 	return k
 }
 
-// AESEncrypt encrypt s with given k
-func AESEncrypt(s, k []byte) ([]byte, error) {
+// AESCFBEncrypt encrypt s with given k
+func AESCFBEncrypt(s, k []byte) ([]byte, error) {
 	block, err := aes.NewCipher(AESMake256Key(k))
 	if err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func AESEncrypt(s, k []byte) ([]byte, error) {
 }
 
 // AESDecrypt decrypt c with given k
-func AESDecrypt(c, k []byte) ([]byte, error) {
+func AESCFBDecrypt(c, k []byte) ([]byte, error) {
 	block, err := aes.NewCipher(AESMake256Key(k))
 	if err != nil {
 		return nil, err
@@ -60,4 +61,61 @@ func AESDecrypt(c, k []byte) ([]byte, error) {
 	cfb := cipher.NewCFBDecrypter(block, iv)
 	cfb.XORKeyStream(cb, cb)
 	return cb, nil
+}
+
+// AESCBCEncrypt encrypt s with given k
+func AESCBCEncrypt(s, k []byte) ([]byte, error) {
+	if len(s)%aes.BlockSize != 0 {
+		return nil, errors.New("invalid length of s")
+	}
+	block, err := aes.NewCipher(AESMake256Key(k))
+	if err != nil {
+		return nil, err
+	}
+	cb := make([]byte, aes.BlockSize+len(s))
+	iv := cb[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, err
+	}
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(cb[aes.BlockSize:], s)
+	return cb, nil
+}
+
+// AESCBCDecrypt decrypt c with given k
+func AESCBCDecrypt(c, k []byte) ([]byte, error) {
+	if len(c) < aes.BlockSize {
+		return nil, errors.New("c too short")
+	}
+	block, err := aes.NewCipher(AESMake256Key(k))
+	if err != nil {
+		return nil, err
+	}
+
+	iv := c[:aes.BlockSize]
+	cb := c[aes.BlockSize:]
+
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks(cb, cb)
+	return cb, nil
+}
+
+// PKCS5 padding
+func PKCS5Padding(c []byte, blockSize int) []byte {
+	pl := blockSize - len(c)%blockSize
+	p := bytes.Repeat([]byte{byte(pl)}, pl)
+	return append(c, p...)
+}
+
+// PKCS5 unpadding
+func PKCS5UnPadding(s []byte) ([]byte, error) {
+	l := len(s)
+	if l == 0 {
+		return nil, errors.New("s too short")
+	}
+	pl := int(s[l-1])
+	if l < pl {
+		return nil, errors.New("s too short")
+	}
+	return s[:(l - pl)], nil
 }
