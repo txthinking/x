@@ -35,15 +35,15 @@ func TestAESCFB(t *testing.T) {
 
 func TestAESCBC(t *testing.T) {
 	s := []byte("txthinking")
+	t.Log("input:", hex.EncodeToString(s), len(s))
 
-	t.Log("input:", string(s))
 	sp := PKCS5Padding(s, 16)
 
 	r, err := AESCBCEncrypt(sp, []byte(KEY))
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(hex.EncodeToString(r), len(r))
+	t.Log("encrypt:", hex.EncodeToString(r), len(r))
 
 	r, err = AESCBCDecrypt(r, []byte(KEY))
 	if err != nil {
@@ -53,7 +53,7 @@ func TestAESCBC(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("output:", string(r))
+	t.Log("output:", hex.EncodeToString(r), len(r))
 
 	if string(s) != string(r) {
 		t.Fatal("AES CBC Error")
