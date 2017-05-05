@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const KEY = "areyoufuckingwithmemustbe32bytes"
+const KEY = "areyoufuckingwit"
 
 func TestAESMake256Key(t *testing.T) {
 	k := AESMake256Key([]byte(KEY))

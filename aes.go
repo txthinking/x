@@ -25,9 +25,14 @@ func AESMake256Key(k []byte) []byte {
 	return k
 }
 
-// AESCFBEncrypt encrypt s with given k
+// AESCFBEncrypt encrypt s with given k.
+// k should be 128/256 bits, otherwise it will append empty data or cut until 256 bits.
+// First 16 bytes of cipher data is the IV.
 func AESCFBEncrypt(s, k []byte) ([]byte, error) {
-	block, err := aes.NewCipher(AESMake256Key(k))
+	if len(k) != 16 && len(k) != 32 {
+		k = AESMake256Key(k)
+	}
+	block, err := aes.NewCipher(k)
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +50,13 @@ func AESCFBEncrypt(s, k []byte) ([]byte, error) {
 }
 
 // AESDecrypt decrypt c with given k
+// k should be 128/256 bits, otherwise it will append empty data or cut until 256 bits
+// First 16 bytes of cipher data is the IV.
 func AESCFBDecrypt(c, k []byte) ([]byte, error) {
-	block, err := aes.NewCipher(AESMake256Key(k))
+	if len(k) != 16 && len(k) != 32 {
+		k = AESMake256Key(k)
+	}
+	block, err := aes.NewCipher(k)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +74,16 @@ func AESCFBDecrypt(c, k []byte) ([]byte, error) {
 }
 
 // AESCBCEncrypt encrypt s with given k
+// k should be 128/256 bits, otherwise it will append empty data or cut until 256 bits
+// First 16 bytes of cipher data is the IV.
 func AESCBCEncrypt(s, k []byte) ([]byte, error) {
+	if len(k) != 16 && len(k) != 32 {
+		k = AESMake256Key(k)
+	}
 	if len(s)%aes.BlockSize != 0 {
 		return nil, errors.New("invalid length of s")
 	}
-	block, err := aes.NewCipher(AESMake256Key(k))
+	block, err := aes.NewCipher(k)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +98,16 @@ func AESCBCEncrypt(s, k []byte) ([]byte, error) {
 }
 
 // AESCBCDecrypt decrypt c with given k
+// k should be 128/256 bits, otherwise it will append empty data or cut until 256 bits
+// First 16 bytes of cipher data is the IV.
 func AESCBCDecrypt(c, k []byte) ([]byte, error) {
+	if len(k) != 16 && len(k) != 32 {
+		k = AESMake256Key(k)
+	}
 	if len(c) < aes.BlockSize {
 		return nil, errors.New("c too short")
 	}
-	block, err := aes.NewCipher(AESMake256Key(k))
+	block, err := aes.NewCipher(k)
 	if err != nil {
 		return nil, err
 	}
@@ -100,14 +120,14 @@ func AESCBCDecrypt(c, k []byte) ([]byte, error) {
 	return cb, nil
 }
 
-// PKCS5 padding
+// PKCS5Padding can append data of PKCS5
 func PKCS5Padding(c []byte, blockSize int) []byte {
 	pl := blockSize - len(c)%blockSize
 	p := bytes.Repeat([]byte{byte(pl)}, pl)
 	return append(c, p...)
 }
 
-// PKCS5 unpadding
+// PKCS5UnPadding can unappend data of PKCS5
 func PKCS5UnPadding(s []byte) ([]byte, error) {
 	l := len(s)
 	if l == 0 {
