@@ -1,14 +1,16 @@
 package ant
 
 import (
+	"encoding/binary"
 	"errors"
+	"net"
 	"strconv"
 	"strings"
 )
 
-// IP2Decimal transform ip format like x.x.x.x to decimal.
+// IP2Decimal0 transform ip format like x.x.x.x to decimal.
 // ref: https://zh.wikipedia.org/wiki/IPv4
-func IP2Decimal(ip string) (n int64, err error) {
+func IP2Decimal0(ip string) (n int64, err error) {
 	ss := strings.Split(ip, ".")
 	var b string
 	var s string
@@ -34,9 +36,31 @@ func IP2Decimal(ip string) (n int64, err error) {
 	return
 }
 
-// Decimal2IP transform a decimal IP to x.x.x.x format.
+// IP2Decimal1 transform ip format like x.x.x.x to decimal.
+func IP2Decimal1(ipstr string) (int64, error) {
+	ip := net.ParseIP(ipstr)
+	if ip == nil {
+		return 0, errors.New("ParseIP error")
+	}
+	// ip is 16 bytes, but ipv4 is only in last 4 bytes
+	d := uint32(ip[12])<<24 | uint32(ip[13])<<16 | uint32(ip[14])<<8 | uint32(ip[15])
+	return int64(d), nil
+}
+
+// IP2Decimal transform ip format like x.x.x.x to decimal.
+func IP2Decimal(ipstr string) (int64, error) {
+	ip := net.ParseIP(ipstr)
+	if ip == nil {
+		return 0, errors.New("ParseIP error")
+	}
+	// ip is 16 bytes, but ipv4 is only in last 4 bytes
+	d := binary.BigEndian.Uint32(ip[12:16])
+	return int64(d), nil
+}
+
+// Decimal2IP0 transform a decimal IP to x.x.x.x format.
 // ref: https://zh.wikipedia.org/wiki/IPv4
-func Decimal2IP(n int64) (ip string, err error) {
+func Decimal2IP0(n int64) (ip string, err error) {
 	ips := make([]string, 4)
 	var b string
 	var i int64
@@ -56,6 +80,28 @@ func Decimal2IP(n int64) (ip string, err error) {
 	ips[3] = strconv.FormatInt(i, 10)
 	ip = strings.Join(ips, ".")
 	return
+}
+
+// Decimal2IP1 transform a decimal IP to x.x.x.x format.
+func Decimal2IP1(n int64) string {
+	ui := uint32(n)
+	ip := ""
+	for i := 0; i < 4; i++ {
+		offset := 8 * (3 - i)
+		tmp := (ui >> uint32(offset)) & 0xff
+		if ip != "" {
+			ip += "."
+		}
+		ip += strconv.Itoa(int(tmp))
+	}
+	return ip
+}
+
+// Decimal2IP transform a decimal IP to x.x.x.x format.
+func Decimal2IP(n int64) string {
+	ip := make(net.IP, 4)
+	binary.BigEndian.PutUint32(ip, uint32(n))
+	return ip.String()
 }
 
 // CIDRInfo is the struct of CIDR
@@ -109,7 +155,7 @@ func CIDR(cidr string) (c *CIDRInfo, err error) {
 		network += "0"
 	}
 	networkI, _ = strconv.ParseInt(network, 2, 64)
-	network, _ = Decimal2IP(networkI)
+	network = Decimal2IP(networkI)
 	c.Network = network
 
 	first := ipb[0:n]
@@ -118,7 +164,7 @@ func CIDR(cidr string) (c *CIDRInfo, err error) {
 		first = first + "0"
 	}
 	firstI, _ = strconv.ParseInt(first, 2, 64)
-	first, _ = Decimal2IP(firstI)
+	first = Decimal2IP(firstI)
 	c.First = first
 
 	last := ipb[0:n]
@@ -127,7 +173,7 @@ func CIDR(cidr string) (c *CIDRInfo, err error) {
 		last = last + "1"
 	}
 	lastI, _ = strconv.ParseInt(last, 2, 64)
-	last, _ = Decimal2IP(lastI)
+	last = Decimal2IP(lastI)
 	c.Last = last
 
 	c.Count = lastI - firstI + 1
