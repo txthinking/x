@@ -16,6 +16,9 @@ func TestSlack(t *testing.T) {
 	//if err := s.Send(map[string]string{"hello": "1", "world": "2"}); err != nil {
 	//t.Fatal(err)
 	//}
+	//if err := s.Send(map[string]interface{}{"hello": "1", "world": "2"}); err != nil {
+	//t.Fatal(err)
+	//}
 	//if err := s.Send(&http.Client{}); err != nil {
 	//t.Fatal(err)
 	//}

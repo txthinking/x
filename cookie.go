@@ -56,7 +56,8 @@ func (kv *CryptKV) Decrypt(c string, k string) (string, error) {
 	return m["v"].(string), nil
 }
 
-func (kv *CryptKV) GetIDFromRequest(r *http.Request, k string) (string, error) {
+// Decrypt from http.Request
+func (kv *CryptKV) DecryptFromRequest(r *http.Request, k string) (string, error) {
 	c, err := r.Cookie(k)
 	if err != nil {
 		return "", err
