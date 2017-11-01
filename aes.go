@@ -121,6 +121,7 @@ func AESCBCDecrypt(c, k []byte) ([]byte, error) {
 }
 
 // PKCS5Padding can append data of PKCS5
+// Common blockSize is aes.BlockSize
 func PKCS5Padding(c []byte, blockSize int) []byte {
 	pl := blockSize - len(c)%blockSize
 	p := bytes.Repeat([]byte{byte(pl)}, pl)
@@ -138,4 +139,41 @@ func PKCS5UnPadding(s []byte) ([]byte, error) {
 		return nil, errors.New("s too short")
 	}
 	return s[:(l - pl)], nil
+}
+
+// AESGCMEncrypt encrypt s use k and nonce
+func AESGCMEncrypt(s, k, n []byte) ([]byte, error) {
+	if len(k) != 16 && len(k) != 32 {
+		k = AESMake256Key(k)
+	}
+	block, err := aes.NewCipher(k)
+	if err != nil {
+		return nil, err
+	}
+	g, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	c := g.Seal(nil, n, s, nil)
+	return c, nil
+}
+
+// AESGCMDecrypt decrypt s use k and nonce
+func AESGCMDecrypt(c, k, n []byte) ([]byte, error) {
+	if len(k) != 16 && len(k) != 32 {
+		k = AESMake256Key(k)
+	}
+	block, err := aes.NewCipher(k)
+	if err != nil {
+		return nil, err
+	}
+	g, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	s, err := g.Open(nil, n, c, nil)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
 }

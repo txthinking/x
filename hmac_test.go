@@ -6,14 +6,15 @@ import (
 )
 
 func TestHmacSha256(t *testing.T) {
+	KEY := []byte("12345678901234567890123456789012")
 	s := []byte("txthinking")
-	r, err := HmacSha256(s, []byte(KEY))
+	r, err := HmacSha256(s, KEY)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(hex.EncodeToString(r), len(r))
 
-	ok, err := CheckHmacSha256(s, r, []byte(KEY))
+	ok, err := CheckHmacSha256(s, r, KEY)
 	if err != nil {
 		t.Fatal(err)
 	}
