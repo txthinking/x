@@ -2,9 +2,11 @@ package ant
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"path/filepath"
 )
 
@@ -77,4 +79,14 @@ func MultipartFormDataFromReader(params map[string][]string, files map[string][]
 	bf.WriteString(fmt.Sprintf("--%s--\r\n", boundary))
 	ior = bf
 	return
+}
+
+func Json(w http.ResponseWriter, v interface{}) {
+	d, err := json.Marshal(v)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	w.Header().Set("content-type", "application/json")
+	w.Write(d)
 }
