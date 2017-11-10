@@ -21,4 +21,18 @@ func TestHmacSha256(t *testing.T) {
 	if !ok {
 		t.Fatal("HmacSha256 Error")
 	}
+
+	r, err = HmacSha1(s, KEY)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(hex.EncodeToString(r), len(r))
+
+	ok, err = CheckHmacSha1(s, r, KEY)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ok {
+		t.Fatal("HmacSha1 Error")
+	}
 }
