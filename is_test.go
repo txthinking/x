@@ -55,15 +55,20 @@ func TestIsChineseID(t *testing.T) {
 }
 
 func TestIsChineseWords(t *testing.T) {
-	a := []string{
-		"猪八戒",
-		"xia往往",
+	a := []struct {
+		input    string
+		expected bool
+	}{
+		{"猪八戒", true},
+		{"xia往往", false},
 	}
 	for _, v := range a {
-		ok, err := IsChineseWords(v)
+		ok, err := IsChineseWords(v.input)
 		if err != nil {
 			t.Fatal(v, err)
 		}
-		t.Log(v, ok)
+		if ok != v.expected {
+			t.Fatal("Chinese word test fail")
+		}
 	}
 }
