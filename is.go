@@ -4,6 +4,7 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"unicode"
 	"strings"
 )
 
@@ -74,7 +75,11 @@ func IsChineseID(s string) (ok bool, err error) {
 // IsChineseWords determine whether it is Chinese words
 // Notice: NOT ALL
 func IsChineseWords(words string) (ok bool, err error) {
-	p := `^[\x{4e00}-\x{9fa5}]+$`
-	ok, err = regexp.MatchString(p, words)
-	return
+	// every rune is chinese
+	for _, c := range words {
+		if !unicode.Is(unicode.Scripts["Han"], c) {
+			return false, nil
+		}
+	}
+	return true, nil
 }
