@@ -81,6 +81,17 @@ func MultipartFormDataFromReader(params map[string][]string, files map[string][]
 	return
 }
 
+func ReadJson(r *http.Request, o interface{}) error {
+	d, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(d, o); err != nil {
+		return err
+	}
+	return nil
+}
+
 func Json(w http.ResponseWriter, v interface{}) {
 	d, err := json.Marshal(v)
 	if err != nil {
