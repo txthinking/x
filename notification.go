@@ -3,56 +3,22 @@ package ant
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"fmt"
 	"net/http"
 	"time"
 
-	sj "github.com/bitly/go-simplejson"
+	simplejson "github.com/bitly/go-simplejson"
 )
 
-type Slack struct {
-	URL      string
-	Channel  string
-	UserName string
-	IconURL  string
+type Chat struct {
+	URL string
 }
 
-// Send data to slack channel
+// Send data to hangout chat
 // data must be one of map[string]string, map[string]interface{}, string, []string, struct
 // cui is channel like #general, username, icon_url
-func (sl *Slack) Send(data interface{}, cui ...string) error {
+func (c *Chat) SendText(data interface{}) error {
 	s, err := ToString(data)
-	if err != nil {
-		return err
-	}
-
-	if len(cui) == 1 {
-		sl.Channel = cui[0]
-	}
-	if len(cui) == 2 {
-		sl.Channel = cui[0]
-		sl.UserName = cui[1]
-	}
-	if len(cui) == 3 {
-		sl.Channel = cui[0]
-		sl.UserName = cui[1]
-		sl.IconURL = cui[2]
-	}
-	if sl.Channel == "" {
-		sl.Channel = "#general"
-	}
-	if sl.UserName == "" {
-		sl.UserName = "Bot"
-	}
-
-	j := sj.New()
-	j.Set("text", "```"+s+"```")
-	j.Set("channel", sl.Channel)
-	j.Set("username", sl.UserName)
-	if sl.IconURL != "" {
-		j.Set("icon_url", sl.IconURL)
-	}
-	d, err := j.Encode()
 	if err != nil {
 		return err
 	}
@@ -60,17 +26,74 @@ func (sl *Slack) Send(data interface{}, cui ...string) error {
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
-	r, err := client.Post(sl.URL, "application/json", bytes.NewReader(d))
+	j := simplejson.New()
+	j.Set("text", "```\n"+s+"\n```")
+	b, err := j.MarshalJSON()
+	if err != nil {
+		return err
+	}
+	rq, err := http.NewRequest("POST", c.URL, bytes.NewReader(b))
+	if err != nil {
+		return err
+	}
+	r, err := client.Do(rq)
 	if err != nil {
 		return err
 	}
 	defer r.Body.Close()
-	d, err = ioutil.ReadAll(r.Body)
+	if r.StatusCode != 200 {
+		return errors.New(r.Status)
+	}
+	return nil
+}
+
+func (c *Chat) SendCard(img, text, link string) error {
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	s := `
+{
+  "cards": [
+    {
+      "sections": [
+        {
+          "widgets": [
+            {
+              "image": { "imageUrl": "%s" }
+            },
+            {
+              "buttons": [
+                {
+                  "textButton": {
+                    "text": "%s",
+                    "onClick": {
+                      "openLink": {
+                        "url": "%s"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+`
+	s = fmt.Sprintf(s, img, text, link)
+	rq, err := http.NewRequest("POST", c.URL, bytes.NewBufferString(s))
 	if err != nil {
 		return err
 	}
+	r, err := client.Do(rq)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
 	if r.StatusCode != 200 {
-		return errors.New(r.Status + ": " + string(d))
+		return errors.New(r.Status)
 	}
 	return nil
 }
