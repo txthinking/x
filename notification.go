@@ -16,7 +16,6 @@ type Chat struct {
 
 // Send data to hangout chat
 // data must be one of map[string]string, map[string]interface{}, string, []string, struct
-// cui is channel like #general, username, icon_url
 func (c *Chat) SendText(data interface{}) error {
 	s, err := ToString(data)
 	if err != nil {
@@ -27,7 +26,11 @@ func (c *Chat) SendText(data interface{}) error {
 		Timeout: 10 * time.Second,
 	}
 	j := simplejson.New()
-	j.Set("text", "```\n"+s+"\n```")
+	if _, ok := data.(string); ok {
+		j.Set("text", s)
+	} else {
+		j.Set("text", "```\n"+s+"\n```")
+	}
 	b, err := j.MarshalJSON()
 	if err != nil {
 		return err

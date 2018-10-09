@@ -3,19 +3,13 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/txthinking/ant)](https://goreportcard.com/report/github.com/txthinking/ant)
 [![GoDoc](https://godoc.org/github.com/txthinking/ant?status.svg)](https://godoc.org/github.com/txthinking/ant)
 
-A util library for golang.
+My util library
 
 ### Install
 
 ```
 $ go get -u github.com/txthinking/ant
 ```
-
-Contributing
----
-
-* Please contribute your pull request on `develop` branch
-* Please contain test case
 
 License
 ---

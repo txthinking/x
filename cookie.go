@@ -1,10 +1,10 @@
 package ant
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -22,25 +22,25 @@ func (kv *CryptKV) Encrypt(k string, v string) (string, error) {
 		"v":          v,
 		"expired_at": time.Now().Add(time.Second * time.Duration(kv.LifeCycle)).Unix(),
 	}
-	d, err := json.Marshal(m)
+	b, err := json.Marshal(m)
 	if err != nil {
 		return "", err
 	}
-	d, err = AESCFBEncrypt(d, AESMake256Key(kv.AESKey))
+	b, err = AESCFBEncrypt(b, AESMake256Key(kv.AESKey))
 	if err != nil {
 		return "", err
 	}
-	return url.PathEscape(string(d)), nil
+	return hex.EncodeToString(b), nil
 }
 
 // Decrypt key, value
 func (kv *CryptKV) Decrypt(c string, k string) (string, error) {
-	s, err := url.PathUnescape(c)
+	b, err := hex.DecodeString(c)
 	if err != nil {
 		return "", err
 	}
 	m := make(map[string]interface{})
-	d, err := AESCFBDecrypt([]byte(s), AESMake256Key(kv.AESKey))
+	d, err := AESCFBDecrypt(b, AESMake256Key(kv.AESKey))
 	if err != nil {
 		return "", err
 	}
