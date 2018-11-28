@@ -1,11 +1,11 @@
-package ant
+package x
 
 import (
 	"math"
 	"regexp"
 	"strconv"
-	"unicode"
 	"strings"
+	"unicode"
 )
 
 // IsEmail determine whether it is email address
