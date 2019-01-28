@@ -13,14 +13,16 @@ import (
 
 type DB struct {
 	DB *sqlx.DB
+	s  bool // TODO: will be removed
 }
 
 type Tx struct {
 	Tx *sqlx.Tx
+	s  bool
 }
 
 // connLifeTime must < mysql.wait_timeout
-func NewDB(dsn string, connLifeTime time.Duration) (*DB, error) {
+func NewDB(dsn string, connLifeTime time.Duration, s bool) (*DB, error) {
 	db, err := sqlx.Connect("mysql", dsn)
 	if err != nil {
 		return nil, err
@@ -29,6 +31,7 @@ func NewDB(dsn string, connLifeTime time.Duration) (*DB, error) {
 	db.SetMaxOpenConns(100)
 	return &DB{
 		DB: db,
+		s:  s,
 	}, nil
 }
 
@@ -46,7 +49,10 @@ func (db *DB) Insert(o interface{}) (int64, error) {
 		fs = append(fs, "`"+f+"`")
 		fs1 = append(fs1, ":"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if db.s {
+		table = inflection.Plural(table)
+	}
 	s := "insert into `%s`(%s) values(%s)"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","), strings.Join(fs1, ","))
 	rt, err := db.DB.NamedExec(s, o)
@@ -64,7 +70,10 @@ func (db *DB) Insert(o interface{}) (int64, error) {
 func (db *DB) Get(id int64, o interface{}) error {
 	t := reflect.TypeOf(o)
 	t1 := t.Elem()
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if db.s {
+		table = inflection.Plural(table)
+	}
 	s := "select * from %s where ID=? limit 1"
 	s = fmt.Sprintf(s, table)
 	if err := db.DB.Get(o, s, id); err != nil {
@@ -85,7 +94,10 @@ func (db *DB) Update(o interface{}) error {
 		}
 		fs = append(fs, "`"+f+"`=:"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if db.s {
+		table = inflection.Plural(table)
+	}
 	s := "update `%s` set %s where ID=:ID"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","))
 
@@ -120,7 +132,10 @@ func (db *DB) UpdateOnly(o interface{}, only ...string) error {
 
 		fs = append(fs, "`"+f+"`=:"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if db.s {
+		table = inflection.Plural(table)
+	}
 	s := "update `%s` set %s where ID=:ID"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","))
 
@@ -155,7 +170,10 @@ func (db *DB) UpdateExcept(o interface{}, ignore ...string) error {
 
 		fs = append(fs, "`"+f+"`=:"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if db.s {
+		table = inflection.Plural(table)
+	}
 	s := "update `%s` set %s where ID=:ID"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","))
 
@@ -170,7 +188,10 @@ func (db *DB) UpdateExcept(o interface{}, ignore ...string) error {
 func (db *DB) Delete(o interface{}) error {
 	t := reflect.TypeOf(o)
 	t1 := t.Elem()
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if db.s {
+		table = inflection.Plural(table)
+	}
 	s := "delete from `%s` where ID=:ID"
 	s = fmt.Sprintf(s, table)
 
@@ -188,6 +209,7 @@ func (db *DB) Begin() (*Tx, error) {
 	}
 	return &Tx{
 		Tx: tx,
+		s:  db.s,
 	}, nil
 }
 
@@ -205,7 +227,10 @@ func (tx *Tx) Insert(o interface{}) (int64, error) {
 		fs = append(fs, "`"+f+"`")
 		fs1 = append(fs1, ":"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if tx.s {
+		table = inflection.Plural(table)
+	}
 	s := "insert into `%s`(%s) values(%s)"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","), strings.Join(fs1, ","))
 	rt, err := tx.Tx.NamedExec(s, o)
@@ -223,7 +248,10 @@ func (tx *Tx) Insert(o interface{}) (int64, error) {
 func (tx *Tx) Get(id int64, o interface{}) error {
 	t := reflect.TypeOf(o)
 	t1 := t.Elem()
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if tx.s {
+		table = inflection.Plural(table)
+	}
 	s := "select * from %s where ID=? limit 1"
 	s = fmt.Sprintf(s, table)
 	if err := tx.Tx.Get(o, s, id); err != nil {
@@ -244,7 +272,10 @@ func (tx *Tx) Update(o interface{}) error {
 		}
 		fs = append(fs, "`"+f+"`=:"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if tx.s {
+		table = inflection.Plural(table)
+	}
 	s := "update `%s` set %s where ID=:ID"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","))
 
@@ -279,7 +310,10 @@ func (tx *Tx) UpdateOnly(o interface{}, only ...string) error {
 
 		fs = append(fs, "`"+f+"`=:"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if tx.s {
+		table = inflection.Plural(table)
+	}
 	s := "update `%s` set %s where ID=:ID"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","))
 
@@ -314,7 +348,10 @@ func (tx *Tx) UpdateExcept(o interface{}, ignore ...string) error {
 
 		fs = append(fs, "`"+f+"`=:"+f)
 	}
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if tx.s {
+		table = inflection.Plural(table)
+	}
 	s := "update `%s` set %s where ID=:ID"
 	s = fmt.Sprintf(s, table, strings.Join(fs, ","))
 
@@ -329,7 +366,10 @@ func (tx *Tx) UpdateExcept(o interface{}, ignore ...string) error {
 func (tx *Tx) Delete(o interface{}) error {
 	t := reflect.TypeOf(o)
 	t1 := t.Elem()
-	table := inflection.Plural(t1.String()[strings.LastIndex(t1.String(), ".")+1:])
+	table := t1.String()[strings.LastIndex(t1.String(), ".")+1:]
+	if tx.s {
+		table = inflection.Plural(table)
+	}
 	s := "delete from `%s` where ID=:ID"
 	s = fmt.Sprintf(s, table)
 
