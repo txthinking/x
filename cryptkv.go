@@ -4,23 +4,21 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"net/http"
 	"time"
 )
 
 // CryptKV can be used to crypt value by key and give it a lifecycle (s).
 // Can be used in cookies
 type CryptKV struct {
-	AESKey    []byte
-	LifeCycle int
+	AESKey []byte
 }
 
 // Encrypt key, value
 func (kv *CryptKV) Encrypt(k string, v string) (string, error) {
 	m := map[string]interface{}{
-		"k":          k,
-		"v":          v,
-		"expired_at": time.Now().Add(time.Second * time.Duration(kv.LifeCycle)).Unix(),
+		"k": k,
+		"v": v,
+		"t": time.Now().Unix(),
 	}
 	b, err := json.Marshal(m)
 	if err != nil {
@@ -34,7 +32,7 @@ func (kv *CryptKV) Encrypt(k string, v string) (string, error) {
 }
 
 // Decrypt key, value
-func (kv *CryptKV) Decrypt(c string, k string) (string, error) {
+func (kv *CryptKV) Decrypt(c string, k string, lifecycle int64) (string, error) {
 	b, err := hex.DecodeString(c)
 	if err != nil {
 		return "", err
@@ -47,24 +45,13 @@ func (kv *CryptKV) Decrypt(c string, k string) (string, error) {
 	if err := json.Unmarshal(d, &m); err != nil {
 		return "", err
 	}
-	if time.Unix(int64(m["expired_at"].(float64)), 0).Before(time.Now()) {
-		return "", errors.New("Expired")
+	if lifecycle != 0 {
+		if int64(m["t"].(float64))+lifecycle < time.Now().Unix() {
+			return "", errors.New("Expired")
+		}
 	}
 	if m["k"].(string) != k {
 		return "", errors.New("Unmarch key")
 	}
 	return m["v"].(string), nil
-}
-
-// Decrypt from http.Request
-func (kv *CryptKV) DecryptFromRequest(r *http.Request, k string) (string, error) {
-	c, err := r.Cookie(k)
-	if err != nil {
-		return "", err
-	}
-	v, err := kv.Decrypt(c.Value, k)
-	if err != nil {
-		return "", err
-	}
-	return v, nil
 }

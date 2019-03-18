@@ -240,3 +240,42 @@ func (jp *JPush) Message(ids []string, extras interface{}) error {
 	}
 	return errors.New(s)
 }
+
+type TwilioSMS struct {
+	Account string
+	Token   string
+	From    string
+}
+
+func (t *TwilioSMS) Send(message, mobile string) error {
+	v := url.Values{}
+	v.Set("From", t.From)
+	v.Set("To", mobile)
+	v.Set("Body", message)
+	rq, err := http.NewRequest("POST", "https://api.twilio.com/2010-04-01/Accounts/"+t.Account+"/Messages.json", bytes.NewReader([]byte(v.Encode())))
+	if err != nil {
+		return err
+	}
+	rq.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(t.Account+":"+t.Token)))
+	rq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	r, err := client.Do(rq)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+	if r.StatusCode == 201 {
+		return nil
+	}
+	j, err := simplejson.NewFromReader(r.Body)
+	if err != nil {
+		return err
+	}
+	s, err := j.GetPath("message").String()
+	if err != nil {
+		return err
+	}
+	return errors.New(s)
+}

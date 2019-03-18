@@ -74,7 +74,7 @@ func (db *DB) Get(id int64, o interface{}) error {
 	if db.s {
 		table = inflection.Plural(table)
 	}
-	s := "select * from %s where ID=? limit 1"
+	s := "select * from `%s` where ID=? limit 1"
 	s = fmt.Sprintf(s, table)
 	if err := db.DB.Get(o, s, id); err != nil {
 		return err
@@ -252,7 +252,7 @@ func (tx *Tx) Get(id int64, o interface{}) error {
 	if tx.s {
 		table = inflection.Plural(table)
 	}
-	s := "select * from %s where ID=? limit 1"
+	s := "select * from `%s` where ID=? limit 1"
 	s = fmt.Sprintf(s, table)
 	if err := tx.Tx.Get(o, s, id); err != nil {
 		return err
