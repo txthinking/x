@@ -2,24 +2,29 @@ package x
 
 import (
 	"net"
-	"time"
 )
 
 // Dialer is a common interface for dialing
 type Dialer interface {
 	Dial(network, addr string) (net.Conn, error)
+	DialTCP(network string, laddr, raddr *net.TCPAddr) (*net.TCPConn, error)
+	DialUDP(network string, laddr, raddr *net.UDPAddr) (*net.UDPConn, error)
 }
 
-// DefaultDial is the default dialer which dial with tcp network
 type Dial struct {
-	Timeout time.Duration
 }
 
-var DefaultDial = &Dial{
-	Timeout: 10 * time.Second,
-}
+// DefaultDial is the default dialer in net package
+var DefaultDial = &Dial{}
 
-// Dial a remote address
 func (d *Dial) Dial(network, addr string) (net.Conn, error) {
-	return net.DialTimeout(network, addr, d.Timeout)
+	return net.Dial(network, addr)
+}
+
+func (d *Dial) DialTCP(network string, laddr, raddr *net.TCPAddr) (*net.TCPConn, error) {
+	return net.DialTCP(network, laddr, raddr)
+}
+
+func (d *Dial) DialUDP(network string, laddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
+	return net.DialUDP(network, laddr, raddr)
 }
