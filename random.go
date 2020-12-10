@@ -11,8 +11,11 @@ func RandomNumber() (i int64) {
 	return
 }
 
-// Random used to get a random number between min and max
+// Random used to get a random number between [min, max)
 func Random(min, max int64) int64 {
+	if max <= min {
+		return min
+	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return r.Int63n(max-min) + min
 }
