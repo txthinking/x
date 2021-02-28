@@ -6,9 +6,9 @@ import (
 
 // Resolver is a common interface for dialing
 type Resolver interface {
-	Dial(network, addr string) (net.Addr, error)
-	DialTCP(network, dest string) (net.Addr, error)
-	DialUDP(network, dest string) (net.Addr, error)
+	Resolve(network, addr string) (net.Addr, error)
+	ResolveTCPAddr(network, dest string) (net.Addr, error)
+	ResolveUDPAddr(network, dest string) (net.Addr, error)
 }
 
 type Resolve struct {
@@ -26,10 +26,10 @@ func (d *Resolve) Resolve(network, addr string) (net.Addr, error) {
 	return net.ResolveIPAddr(network, addr)
 }
 
-func (d *Resolve) ResolveTCP(network, dest string) (net.Addr, error) {
+func (d *Resolve) ResolveTCPAddr(network, dest string) (net.Addr, error) {
 	return net.ResolveTCPAddr("tcp", dest)
 }
 
-func (d *Resolve) ResolveUDP(network, dest string) (net.Addr, error) {
+func (d *Resolve) ResolveUDPAddr(network, dest string) (net.Addr, error) {
 	return net.ResolveUDPAddr("udp", dest)
 }
