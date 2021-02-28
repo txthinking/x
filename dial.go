@@ -7,8 +7,8 @@ import (
 // Dialer is a common interface for dialing
 type Dialer interface {
 	Dial(network, addr string) (net.Conn, error)
-	DialTCP(network string, laddr, raddr *net.TCPAddr) (*net.TCPConn, error)
-	DialUDP(network string, laddr, raddr *net.UDPAddr) (*net.UDPConn, error)
+	DialTCP(network string, laddr, raddr net.Addr) (net.Conn, error)
+	DialUDP(network string, laddr, raddr net.Addr) (net.PacketConn, error)
 }
 
 type Dial struct {
@@ -21,10 +21,10 @@ func (d *Dial) Dial(network, addr string) (net.Conn, error) {
 	return net.Dial(network, addr)
 }
 
-func (d *Dial) DialTCP(network string, laddr, raddr *net.TCPAddr) (*net.TCPConn, error) {
-	return net.DialTCP(network, laddr, raddr)
+func (d *Dial) DialTCP(network string, laddr, raddr net.Addr) (net.Conn, error) {
+	return net.DialTCP(network, laddr.(*net.TCPAddr), raddr.(*net.TCPAddr))
 }
 
-func (d *Dial) DialUDP(network string, laddr, raddr *net.UDPAddr) (*net.UDPConn, error) {
-	return net.DialUDP(network, laddr, raddr)
+func (d *Dial) DialUDP(network string, laddr, raddr net.Addr) (net.PacketConn, error) {
+	return net.DialUDP(network, laddr.(*net.UDPAddr), raddr.(*net.UDPAddr))
 }
