@@ -21,7 +21,6 @@ func (d *Dial) Dial(network, addr string) (net.Conn, error) {
 	return net.Dial(network, addr)
 }
 
-<<<<<<< HEAD
 func (d *Dial) DialTCPS(network string, laddr, raddr net.Addr) (*net.TCPConn, error) {
 	return net.DialTCP(network, laddr.(*net.TCPAddr), raddr.(*net.TCPAddr))
 }
